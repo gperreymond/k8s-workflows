@@ -25,7 +25,7 @@ spec:
                 exit 1
               fi
               echo "List of $USER's repositories with the topic '$TOPIC':"
-              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' > /tmp/repos.txt
+              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' | jq -R -s -c '.' > /tmp/repos.txt
         outputs:
           parameters:
             - name: repos
