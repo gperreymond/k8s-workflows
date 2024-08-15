@@ -24,13 +24,16 @@ spec:
                 echo "Error making request to the GitHub API."
                 exit 1
               fi
+              echo $response > response.json
+              cat response.json | jq -r '.[] | select(.topics[]? == "'$TOPIC'")| .name' > filter.txt
+              jq -R -s -c 'split("\n") | map(select(length > 0))' filter.txt > /tmp/output.json
               echo "List of $USER's repositories with the topic '$TOPIC':"
-              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' | jq -R -s -c '.' > /tmp/repos.txt
+              cat /tmp/output.json | jq
         outputs:
           parameters:
             - name: repos
               valueFrom:
-                path: /tmp/repos.txt
+                path: /tmp/output.json
       - name: check-file-in-repos
         serviceAccountName: argo-resources
         inputs:
