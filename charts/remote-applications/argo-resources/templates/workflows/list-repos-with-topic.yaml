@@ -15,19 +15,54 @@ spec:
           command: [sh, -c]
           args:
           - |
-              apk add --no-cache curl jq
-              USER="gperreymond"
-              TOPIC="argo-workflow"
-              URL="https://api.github.com/users/$USER/repos"
-              response=$(curl -s "$URL")
-              if [ $? -ne 0 ]; then
-                echo "Error making request to the GitHub API."
-                exit 1
-              fi
-              echo "List of $USER's repositories with the topic '$TOPIC':"
-              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' > /tmp/git-repositories.txt
+            apk add --no-cache curl jq
+            USER="gperreymond"
+            TOPIC="argo-workflow"
+            URL="https://api.github.com/users/$USER/repos"
+            response=$(curl -s "$URL")
+            if [ $? -ne 0 ]; then
+              echo "Error making request to the GitHub API."
+              exit 1
+            fi
+            echo "List of $USER's repositories with the topic '$TOPIC':"
+            echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' > /tmp/repos.txt
         outputs:
           parameters:
-          - name: git-repositories
-            valueFrom:
-              path: /tmp/git-repositories.txt
+            - name: repos
+              valueFrom:
+                path: /tmp/repos.txt
+      - name: check-file-in-repos
+        serviceAccountName: argo-resources
+        inputs:
+          parameters:
+            - name: repo
+        container:
+          image: alpine:latest
+          command: [sh, -c]
+          args:
+          - |
+            apk add --no-cache curl jq
+            USER="gperreymond"
+            REPO="{{inputs.parameters.repo}}"
+            URL="https://api.github.com/repos/$USER/$REPO/contents/.argo-workflow.yaml"
+            response=$(curl -s "$URL")
+            if [ $? -ne 0 ]; then
+              echo "Error making request to the GitHub API."
+              exit 1
+            fi
+            if echo "$response" | jq -e '.name == ".argo-workflow.yaml"' > /dev/null; then
+              echo "File .argo-workflow.yaml exists in repository $REPO."
+            else
+              echo "File .argo-workflow.yaml does not exist in repository $REPO."
+            fi
+      - name: check-all-repos
+          steps:
+          - - name: list-repos
+              template: list-repos
+          - - name: check-file-in-repos
+              template: check-file-in-repos
+              arguments:
+                parameters:
+                - name: repo
+                  value: "{{item}}"
+              withParam: "{{steps.list-repos.outputs.parameters.repos}}"
