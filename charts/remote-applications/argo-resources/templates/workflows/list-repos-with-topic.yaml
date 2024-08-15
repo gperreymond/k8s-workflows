@@ -5,12 +5,11 @@ metadata:
   name: list-repos-with-topic
 spec:
   schedule: '*/1 * * * *'
-  serviceAccountName: argo-resources
   workflowSpec:
     entrypoint: list-repos
     templates:
       - name: list-repos
-
+        serviceAccountName: argo-resources
         container:
           image: alpine:latest
           command: [sh, -c]
