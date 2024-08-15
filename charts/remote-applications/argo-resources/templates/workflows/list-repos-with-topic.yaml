@@ -25,4 +25,9 @@ spec:
                 exit 1
               fi
               echo "List of $USER's repositories with the topic '$TOPIC':"
-              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name'
+              echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name' > /tmp/git-repositories.txt
+        outputs:
+          parameters:
+          - name: git-repositories
+            valueFrom:
+              path: /tmp/git-repositories.txt
