@@ -43,7 +43,7 @@ spec:
           - |
             apk add --no-cache curl jq
             USER="gperreymond"
-            REPO="{{inputs.parameters.repo}}"
+            REPO="{{ `{{inputs.parameters.repo}}` }}"
             URL="https://api.github.com/repos/$USER/$REPO/contents/.argo-workflow.yaml"
             response=$(curl -s "$URL")
             if [ $? -ne 0 ]; then
@@ -64,5 +64,5 @@ spec:
               arguments:
                 parameters:
                 - name: repo
-                  value: "{{item}}"
-              withParam: "{{steps.list-repos.outputs.parameters.repos}}"
+                  value: "{{ `{{item}}` }}"
+              withParam: "{{ `{{steps.list-repos.outputs.parameters.repos}}` }}"
