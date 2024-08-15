@@ -1,0 +1,27 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: list-repos-with-topic
+spec:
+  schedule: "*/1 * * * *"
+  workflowSpec:
+    entrypoint: list-repos
+    templates:
+    - name: list-repos
+      container:
+        image: alpine:latest
+        command: [sh, -c]
+        args:
+        - |
+          apk add --no-cache curl jq
+          USER="gperreymond"
+          TOPIC="argo-workflow"
+          URL="https://api.github.com/users/$USER/repos"
+          response=$(curl -s "$URL")
+          if [ $? -ne 0 ]; then
+            echo "Error making request to the GitHub API."
+            exit 1
+          fi
+          echo "List of $USER's repositories with the topic '$TOPIC':"
+          echo "$response" | jq -r '.[] | select(.topics[]? == "'$TOPIC'") | .name'
