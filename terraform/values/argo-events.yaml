@@ -1,0 +1,23 @@
+crds:
+  install: true
+
+global:
+  additionalLabels:
+    app: argo-events
+    domain: infra
+
+controller:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+webhook:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      memory: 512Mi

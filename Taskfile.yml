@@ -1,0 +1,49 @@
+# https://taskfile.dev
+version: '3'
+
+vars:
+  KUBERNETES_VERSION: '1.29.4'
+
+tasks:
+
+  # ---------------
+  # INTERNALS
+  # ---------------
+
+  terraform-exec:
+    internal: true
+    dir: '{{.APP_MODULE_PATH}}'
+    cmds:
+      - terraform fmt
+      - terraform {{.CLI_ARGS}}
+
+  # ---------------
+  # ALLOWED
+  # ---------------
+
+  kube-start:
+    dir: '.'
+    cmds:
+      - kind create cluster --config=cluster.yaml
+
+  kube-stop:
+    dir: '.'
+    cmds:
+      - kind delete cluster --name=k8s-workflows
+
+  kube-config:
+    silent: true
+    cmds:
+      - cmd: mkdir -p .tmp
+        ignore_error: true
+      - kind get kubeconfig --name k8s-workflows > .tmp/kubeconfig.yaml
+      - |-
+        DOCKER_IP=$(docker inspect k8s-workflows-control-plane | jq -r '.[0].NetworkSettings.Networks.kind.IPAddress')
+        echo "[INFO] replace with 'server: https://$DOCKER_IP:6443' in file .tmp/kubeconfig.yaml"
+        sed -i "s/\b127.0.0.1\b/$DOCKER_IP/g" .tmp/kubeconfig.yaml
+
+  kube-terraform:
+    cmds:
+      - task: terraform-exec
+        vars:
+          APP_MODULE_PATH: "terraform"

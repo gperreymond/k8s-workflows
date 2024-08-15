@@ -1,0 +1,49 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: stakater-reloader
+  namespace: ${argo_cd_namespace}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+          - key: 'gperreymond/argocd-deployer-all'
+            operator: In
+            values:
+              - 'true'
+        values:
+          targetRevision: '${stakaterReloader.targetRevision}'
+  template:
+    metadata:
+      name: '{{ .name }}-stakater-reloader'
+      namespace: ${argo_cd_namespace}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: shared
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+      sources:
+        - repoURL: https://stakater.github.io/stakater-charts
+          chart: reloader
+          targetRevision: '{{ .values.targetRevision }}'
+          helm:
+            releaseName: stakater-reloader
+            valueFiles:
+              - $values/charts/remote-values/stakater-reloader/global.yaml
+        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{ .server }}'
+        namespace: ${kube_system_namespace}

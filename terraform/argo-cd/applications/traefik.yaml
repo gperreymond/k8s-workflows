@@ -1,0 +1,52 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: traefik
+  namespace: ${argo_cd_namespace}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+          - key: 'gperreymond/argocd-deployer-all'
+            operator: In
+            values:
+              - 'true'
+        values:
+          targetRevision: '${traefik.targetRevision}'
+  template:
+    metadata:
+      name: '{{ .name }}-traefik'
+      namespace: ${argo_cd_namespace}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: shared
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+      sources:
+        - repoURL: https://traefik.github.io/charts
+          chart: traefik
+          targetRevision: '{{ .values.targetRevision }}'
+          helm:
+            releaseName: traefik
+            valueFiles:
+              - $values/charts/remote-values/traefik/global.yaml
+        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+          targetRevision: main
+          path: charts/remote-applications/traefik-resources
+        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{ .server }}'
+        namespace: ${traefik_namespace}

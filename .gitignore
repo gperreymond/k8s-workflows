@@ -1,0 +1,8 @@
+.devbox
+devbox.lock
+
+.tmp
+certs
+
+.terraform
+.terraform.lock.hcl

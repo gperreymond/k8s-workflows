@@ -1,0 +1,28 @@
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: argo-cd
+spec:
+  entryPoints:
+    - 'websecure'
+  routes:
+    - match: 'Host(`argo-cd.docker.localhost`)'
+      kind: Rule
+      priority: 10
+      services:
+        - kind: Service
+          name: argo-cd-argocd-server
+          namespace: argo-system
+          port: 80
+          passHostHeader: true
+    - match: 'Host(`argo-cd.docker.localhost`) && Header(`Content-Type`, `application/grpc`)'
+      kind: Rule
+      priority: 11
+      services:
+        - kind: Service
+          name: argo-cd-argocd-server
+          namespace: argo-system
+          port: 80
+          passHostHeader: true
+          scheme: h2c

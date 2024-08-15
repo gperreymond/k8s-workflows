@@ -1,0 +1,65 @@
+hostNetwork: false
+
+deployment:
+  replicas: 1
+  annotations:
+    reloader.stakater.com/auto: "true"
+
+service:
+  enabled: true
+  type: ClusterIP
+
+providers:
+  kubernetesCRD:
+    allowCrossNamespace: true
+
+logs:
+  general:
+    format: json
+  access:
+    enabled: true
+    format: json
+
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+
+ports:
+  traefik:
+    expose:
+      default: true
+  web:
+    hostPort: 80
+    containerPort: 8000
+    redirectTo:
+      port: websecure
+      priority: 10
+      permanent: true
+  websecure:
+    hostPort: 443
+    containerPort: 8443
+    asDefault: true
+  metrics:
+    expose:
+      default: true
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    entryPoints:
+      - 'websecure'
+    matchRule: 'Host(`traefik.docker.localhost`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))'
+    tls:
+      secretName: docker-localhost-tls-secret
+    annotations:
+      kubernetes.io/ingress.class: traefik
+
+nodeSelector:
+  'pool-system': 'true'
+
+tolerations:
+  - key: 'pool-system'
+    operator: 'Equal'
+    value: 'true'
+    effect: 'NoSchedule'

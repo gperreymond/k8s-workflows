@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.12.0/.schema/devbox.schema.json",
+  "packages": [
+    "kubectx@0.9.5",
+    "go-task@3.38.0",
+    "terraform@1.9.3",
+    "kind@0.23.0",
+    "jq@1.7.1"
+  ],
+  "shell": {
+    "init_hook": [
+      "echo 'Welcome to devbox!' > /dev/null"
+    ],
+    "scripts": {
+      "kube:start":     ["task kube-start"],
+      "kube:config":    ["task kube-config"],
+      "kube:terraform": ["task kube-terraform -- \"$@\""],
+      "kube:stop":      ["task kube-stop"]
+    }
+  }
+}

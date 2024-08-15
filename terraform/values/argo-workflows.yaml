@@ -1,0 +1,25 @@
+crds:
+  install: true
+
+server:
+  authModes: ['server']
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+controller:
+  metricsConfig:
+    enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+
+commonLabels:
+  app: argo-workflows
+  domain: infra

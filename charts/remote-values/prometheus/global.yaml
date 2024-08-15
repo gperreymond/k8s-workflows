@@ -1,0 +1,42 @@
+server:
+  extraArgs:
+    storage.tsdb.max-block-duration: 2h
+    storage.tsdb.min-block-duration: 2h
+    web.enable-remote-write-receiver: null
+  retention: 6h
+  retentionSize: 4GB
+  persistentVolume:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+  service:
+    enabled: true
+
+prometheus-node-exporter:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+kube-state-metrics:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+prometheus-pushgateway:
+  enabled: false
+
+alertmanager:
+  enabled: false

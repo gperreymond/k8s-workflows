@@ -1,0 +1,51 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: metrics-server
+  namespace: ${argo_cd_namespace}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+          - key: 'gperreymond/argocd-deployer-all'
+            operator: In
+            values:
+              - 'true'
+        values:
+          targetRevision: '${metricsServer.targetRevision}'
+  template:
+    metadata:
+      name: '{{ .name }}-metrics-server'
+      namespace: ${argo_cd_namespace}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: shared
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+      sources:
+        - repoURL: https://kubernetes-sigs.github.io/metrics-server
+          chart: metrics-server
+          targetRevision: '{{ .values.targetRevision }}'
+          helm:
+            releaseName: metrics-server
+            values: |
+              clusterName: {{ .values.clusterName }}
+            valueFiles:
+              - $values/charts/remote-values/metrics-server/global.yaml
+        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{ .server }}'
+        namespace: ${kube_system_namespace}
