@@ -4,7 +4,7 @@ kind: CronWorkflow
 metadata:
   name: list-repos-with-topic
 spec:
-  schedule: '*/1 * * * *'
+  schedule: '*/5 * * * *'
   workflowSpec:
     entrypoint: check-all-repos
     templates:
