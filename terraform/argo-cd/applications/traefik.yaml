@@ -41,10 +41,10 @@ spec:
             releaseName: traefik
             valueFiles:
               - $values/charts/remote-values/traefik/global.yaml
-        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+        - repoURL: 'https://github.com/gperreymond/k8s-workflows.git'
           targetRevision: main
           path: charts/remote-applications/traefik-resources
-        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+        - repoURL: 'https://github.com/gperreymond/k8s-workflows.git'
           targetRevision: main
           ref: values
       destination:

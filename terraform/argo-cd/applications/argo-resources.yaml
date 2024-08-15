@@ -34,7 +34,7 @@ spec:
         syncOptions:
           - ServerSideApply=true
       sources:
-        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+        - repoURL: 'https://github.com/gperreymond/k8s-workflows.git'
           targetRevision: main
           path: charts/remote-applications/argo-resources
       destination:

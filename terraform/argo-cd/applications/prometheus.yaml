@@ -47,7 +47,7 @@ spec:
                     clusterName: {{ .values.clusterName }}
             valueFiles:
               - $values/charts/remote-values/prometheus/global.yaml
-        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+        - repoURL: 'https://github.com/gperreymond/k8s-workflows.git'
           targetRevision: main
           ref: values
       destination:
