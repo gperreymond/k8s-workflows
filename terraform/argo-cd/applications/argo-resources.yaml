@@ -1,0 +1,42 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-resources
+  namespace: ${argo_cd_namespace}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - clusters:
+        selector:
+          matchExpressions:
+          - key: 'gperreymond/argocd-deployer-all'
+            operator: In
+            values:
+              - 'true'
+        values:
+          targetRevision: 'main'
+  template:
+    metadata:
+      name: '{{ .name }}-argo-resources'
+      namespace: ${argo_cd_namespace}
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: shared
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true
+      sources:
+        - repoURL: 'https://github.com/perreymond/k8s-workflows.git'
+          targetRevision: main
+          path: charts/remote-applications/argo-resources
+      destination:
+        server: '{{ .server }}'
+        namespace: ${argo_cd_namespace}

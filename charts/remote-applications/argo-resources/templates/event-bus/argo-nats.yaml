@@ -1,0 +1,25 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: EventBus
+metadata:
+  name: argo-nats
+spec:
+  nats:
+    native:
+      # optional, defaults to 3, that is the minimal requirement.
+      replicas: 3
+      # optional, defaults to "none": auth strategy, "none" or "token"
+      auth: none
+    containerTemplate:
+      resources:
+        requests:
+          cpu: '10m'
+    metricsContainerTemplate:
+      resources:
+        requests:
+          cpu: '10m'
+    antiAffinity: false
+    persistence:
+      storageClassName: standard
+      accessMode: ReadWriteOnce
+      volumeSize: 5Gi
